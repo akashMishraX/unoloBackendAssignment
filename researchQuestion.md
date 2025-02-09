@@ -60,6 +60,7 @@ The following diagrams illustrate the four primary multi-tenant database archite
 ### **2. Shared Database and Separate Schema (Bridge Model)**  
 
 <img src="https://pplx-res.cloudinary.com/image/upload/v1739085865/user_uploads/NutfpsVJjrNtGWu/Screenshot-from-2025-02-09-12-50-07.jpg" width="700" height="400" alt="Shared Database and Shared Schema Diagram">
+
 #### **Schema Design**
 - Each tenant has its own schema within a shared database.
 - Schemas are logically isolated but share the same database resources.
