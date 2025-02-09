@@ -1,0 +1,31 @@
+{
+  "name": "storeservice",
+  "version": "1.0.0",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@prisma/client": "^6.3.1",
+    "axios": "^1.7.9",
+    "axois": "^0.0.1-security",
+    "bullmq": "^5.40.0",
+    "express": "^4.21.2",
+    "job-schedule-utils-akashmishrax1": "^2.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "@bull-board/api": "^6.7.4",
+    "@bull-board/express": "^6.7.4",
+    "dotenv": "^16.4.7",
+    "nodemon": "^3.1.9",
+    "prisma": "^6.3.1"
+  }
+}

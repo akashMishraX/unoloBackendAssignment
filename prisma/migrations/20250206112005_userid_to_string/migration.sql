@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "job" ALTER COLUMN "user_id" SET DATA TYPE TEXT;

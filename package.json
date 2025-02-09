@@ -1,0 +1,30 @@
+{
+  "name": "jobscheduler",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    
+    "dev": "concurrently \"cd src/schedulerService && npm run dev\" \"cd src/storeService && npm run dev\"",
+    "start": "concurrently \"cd src/schedulerService && npm run start\" \"cd src/storeService && npm run start\"",
+    "create": "cd schedulerService && npm run create",
+    "migrate": "cd schedulerService && npm run migrate"
+  },
+  "workspaces": [
+    "schedulerService",
+    "storeService"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prisma": "^6.3.1",
+    "dotenv": "^16.4.7"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.3.1",
+    "bullmq": "^5.40.0"
+  }
+}

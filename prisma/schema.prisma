@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum JobStatus {
+  PENDING
+  SCHEDULED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum WorkerStatus {
+  IDLE
+  BUSY
+  DOWN
+}
+
+enum JobType {
+  EMAIL
+  NOTIFICATION
+  DATA_PROCESSING
+  REPORT
+  BACKUP
+}
+
+enum WorkerType {
+  SCHEDULER
+  EXECUTOR
+}
+
+enum segment {
+  SEGMENT_0
+  SEGMENT_1
+  SEGMENT_2
+  SEGMENT_3
+  SEGMENT_4
+  SEGMENT_5
+  SEGMENT_6
+  SEGMENT_7
+  SEGMENT_8
+  SEGMENT_9
+}
+
+model Job {
+  job_id       String   @id @unique
+  user_id      String
+  job_type     JobType
+  is_recurring Boolean
+  interval     String?
+  max_retries  Int?     @default(3)
+  created_time DateTime
+  job_name     String
+  payload      Json
+
+  schedule         JobSchedule?
+  executionHistory JobExecutionHistory[]
+
+  @@map("job")
+}
+
+model JobSchedule {
+  job_id              String   @id @unique
+  next_execution_time Int
+  segment             segment?
+
+  job Job @relation(fields: [job_id], references: [job_id], onDelete: Cascade)
+
+  @@map("job_schedule")
+}
+
+model JobExecutionHistory {
+  job_id           String
+  worker_id        String
+  execution_time   DateTime
+  status           JobStatus
+  retry_count      Int
+  last_update_time DateTime
+  error_message    String?
+
+  job    Job    @relation(fields: [job_id], references: [job_id], onDelete: Cascade)
+  worker Worker @relation(fields: [worker_id], references: [worker_id], onDelete: Cascade)
+
+  @@id([job_id, worker_id]) // Composite primary key
+  @@map("job_execution_history")
+}
+
+model Worker {
+  worker_id           String                @id @default(uuid()) // UUID as primary key
+  instanceId          String                @unique // Lambda invocation ID (prod) or hostname:port (dev)
+  region              String                @default("local") // AWS region (prod) or 'local' (dev)
+  status              WorkerStatus
+  type                WorkerType
+  lastHeartbeat       DateTime              @default(now()) // Timestamp for health checks
+  createdAt           DateTime              @default(now()) // Worker creation timestamp
+  load                Int?                  @default(0) // Worker load indicator
+  capacity            Int?                  @default(4) // Worker capacity indicator
+  JobExecutionHistory JobExecutionHistory[]
+
+  @@map("worker")
+}
