@@ -1,9 +1,12 @@
 import express from "express";
 import ApiResponse from "./util/apiResponse.js";
-import { addJob, workerfunc } from "./db/dbFuctions.js";
+import { addJob, workerfunc ,getAllJobs, getJob, listJobByStatus,retryAJob ,getWorkers,deleteJob, getlog ,getlogs, deleteWorker} from "./db/dbFuctions.js";
 import { serverAdapter } from './bullmq/bullMqDashboard.js';
-     
+import swagger from "./swagger.js";
+import swaggerUi from "swagger-ui-express";
 
+
+const swaggerDocument = swagger();
 export default function apis(app) {
 
     //Middleware
@@ -12,21 +15,21 @@ export default function apis(app) {
     app.use(express.urlencoded({ extended: true }));
 
 
-    // Health check
-    app.get("/", (req, res) => {
-        const response = ApiResponse.success();
-        res.send(response);
-    })
+    // Serve Swagger UI at `/docs`
+    app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+
+    // Health check [YES]
+    app.get("/", (req, res) => {
+        res.json({
+            success: true,
+            message: "API is running",
+        })
+    });
+    //JOBS [YES]
     // Get all job
-    app.get("/jobs",  (req, res) => {
-        const jobs = {
-            "jobs":[
-                {"jobId": "1","status": "PENDING"},
-                {"jobId": "2","status": "COMPLETED"},
-                {"jobId": "3","status": "PENDING"}
-            ]
-        }
+    app.get("/jobs",async  (req, res) => {
+        const jobs = await getAllJobs();
         const response = ApiResponse
         .success(jobs)
         .setStatusCode(ApiResponse.STATUS_SUCCESS);
@@ -34,7 +37,7 @@ export default function apis(app) {
         res.send(response);
     })
 
-    // submit jobs 
+    // submit jobs  [YES]
     app.post("/job",async (req, res) => {
         try {
             const { userId, jobName,jobType , payload, interval, isRecurring } = req.body;
@@ -74,6 +77,153 @@ export default function apis(app) {
         
     });
 
+    // delete jobs [YES]
+    app.delete("/job/:jobId",async (req, res) => {
+        try {
+            const jobId = req.params.jobId;
+            await deleteJob(jobId);
+
+            const response = ApiResponse
+            .success()
+            .setStatusCode(ApiResponse.STATUS_SUCCESS)
+            .setData('Job cancelled successfully');
+            res.send(response);
+
+
+        } catch (error) {
+            const response = ApiResponse
+            .serverError()
+            .setError(error);
+            res.send(response);
+        }
+    });
+
+    // Get jobs by userId [YES]
+    app.get("/job/:userId",async (req, res) => {
+        try {
+            const jobId = req.params.jobId;
+            const jobData = await getJob(jobId);
+            const response = ApiResponse
+            .success()
+            .setStatusCode(ApiResponse.STATUS_SUCCESS)
+            .setData(jobData);
+            res.send(response);
+        } catch (error) {
+            const response = ApiResponse
+            .serverError()
+            .setError(error);
+            res.send(response);
+        }
+    });
+
+
+    // list jobs by status [YES]
+    app.get("/status/jobs", async (req, res) => {
+        try {
+            let status = req.query.status;
+            status = status.toUpperCase().trim();
+            const jobs = await listJobByStatus(status);
+
+            const response = ApiResponse
+            .success()
+            .setStatusCode(ApiResponse.STATUS_SUCCESS)
+            .setData(jobs);
+            res.send(response);
+        } catch (error) {
+            const response = ApiResponse
+            .serverError()
+            .setError(error.message);
+            res.send(response);
+        }
+    });
+    
+    // Get job logs [YES]
+    app.get("/logs/jobs", async (req, res) => {
+        try {
+            let jobsLogs =await  getlogs()
+            if(!jobsLogs.success) throw new Error(jobsLogs.message);
+
+            const response = ApiResponse
+            .success()
+            .setStatusCode(ApiResponse.STATUS_SUCCESS)
+            .setData(jobsLogs.message);
+            res.send(response);
+
+        } catch (error) {
+            const response = ApiResponse
+            .serverError()
+            .setError(error.message);
+            res.send(response);
+        }
+    });
+    // Get job log by jobId [YES]
+    app.get("/logs/job", async (req, res) => {
+        try {
+            const jobId = req.body.jobId;
+            if(!jobId) {
+                throw new Error('Missing required fields');
+            }
+            let jobsLogs = await getlog(jobId);
+            if(!jobsLogs.success) throw new Error(jobsLogs.message);
+            
+
+            const response = ApiResponse
+            .success()
+            .setStatusCode(ApiResponse.STATUS_SUCCESS)
+            .setData(jobsLogs.message);
+            res.send(response);
+
+        } catch (error) {
+            const response = ApiResponse
+            .serverError()
+            .setError(error.message);
+            res.send(response);
+        }
+    });
+
+    // // Retry a job
+    // app.post("/job/retry/:jobId", async (req, res) => {
+    //     try {
+    //         const jobId = req.params.jobId;
+            
+    //         const result = await retryAJob(jobId);
+    //         if(result.success === false) throw new Error(result.message);
+            
+    //         const response = ApiResponse
+    //         .success()
+    //         .setStatusCode(ApiResponse.STATUS_SUCCESS)
+    //         .setData(result.message);
+
+    //         setTimeout(() => {
+    //             res.send(response);
+    //         },3*1000);
+
+    //     } catch (error) {
+    //         const response = ApiResponse
+    //         .serverError()
+    //         .setError(error);
+    //         res.send(response);
+    //     }
+    // });
+    
+
+    // WORKERS
+    app.get("/workers",async (req, res) => {
+        try {
+            const workers = await getWorkers();
+            const response = ApiResponse
+            .success()
+            .setStatusCode(ApiResponse.STATUS_SUCCESS)
+            .setData(workers);
+            res.send(response);
+        } catch (error) {
+            const response = ApiResponse
+            .serverError()
+            .setError(error);
+            res.send(response);
+        }
+    });
+
     app.post("/worker",async (req, res) => {
         try {
             const { instanceId ,region, status , type , capacity } = req.body;
@@ -110,6 +260,7 @@ export default function apis(app) {
         }
         
     });
+
     app.put("/worker",async (req, res) => {
         try {
             const { instanceId ,status } = req.body;
@@ -144,186 +295,32 @@ export default function apis(app) {
 
             res.send(response);
         }
-    });    
-    // Get jobs status
-    app.get("/job/:jobId",async (req, res) => {
-        try {
-            const jobId = req.params.jobId;
-
-
-            const jobData = await Promise.resolve({
-                "jobId": jobId,
-                "status": "COMPLETED"
-            });
-
-
-            const response = ApiResponse
-            .success()
-            .setStatusCode(ApiResponse.STATUS_SUCCESS)
-            .setData(jobData);
-            res.send(response);
-        } catch (error) {
-            const response = ApiResponse
-            .serverError()
-            .setError(error);
-            res.send(response);
-        }
-    });
-
-    // cancel jobs
-    app.delete("/job/:jobId", (req, res) => {
-        try {
-            const jobId = req.params.jobId;
-
-            const response = ApiResponse
-            .success()
-            .setStatusCode(ApiResponse.STATUS_SUCCESS)
-            .setData('Job cancelled successfully');
-            res.send(response);
-
-
-        } catch (error) {
-            const response = ApiResponse
-            .serverError()
-            .setError(error);
-            res.send(response);
-        }
-    });
-
-    // list pending jobs
-    app.get("/jobs/pending", async (req, res) => {
-        try {
-            const jobsPending = await Promise.resolve([
-                {
-                    "jobId": "1",
-                    "job_name":"Send an email to admin",
-                    "is_recurring": false,
-                    "job_frequency":"PT12H",
-                    "status": "PENDING"
-                },
-                {
-                    "jobId": "2",
-                    "job_name":"Send an email to user",
-                    "is_recurring": true,
-                    "job_frequency":"PT24H",
-                    "status": "PENDING"
-                }
-            ])
-
-            const response = ApiResponse
-            .success()
-            .setStatusCode(ApiResponse.STATUS_SUCCESS)
-            .setData(jobsPending);
-            res.send(response);
-        } catch (error) {
-            const response = ApiResponse
-            .serverError()
-            .setError(error);
-            res.send(response);
-        }
-    });
-
-    //Get all running jobs on workers
-    app.get("/jobs/executing", async  (req, res) => {    
-        try {
-            const jobsExecuting = await Promise.resolve([
-                {
-                    "jobId": "3",
-                    "job_name":"Send an email to CEO",
-                    "is_recurring": true,
-                    "job_frequency":"PT24H",
-                    "status": "EXECUTING"
-                },
-                {
-                    "jobId": "4",
-                    "job_name":"Send an email to developers",
-                    "is_recurring": true,
-                    "job_frequency":"PT24H",
-                    "status": "EXECUTING"
-                }
-            ])
-
-            const response = ApiResponse
-            .success()
-            .setStatusCode(ApiResponse.STATUS_SUCCESS)
-            .setData(jobsExecuting);
-            res.send(response);
-        } catch (error) {
-            const response = ApiResponse
-            .serverError()
-            .setError(error);
-            res.send(response);
-        }
-    });
-
-    app.get("/jobs/failed", async (req, res) => {
-        try {
-            const jobsFailed = await Promise.resolve([
-                {
-                    "jobId": "10",
-                    "job_name":"Send an email to STACKHOLDERS",
-                    "is_recurring": true,
-                    "job_frequency":"PT24H",
-                    "status": "FAILED"
-                },
-            ])
-
-            const response = ApiResponse
-            .success()
-            .setStatusCode(ApiResponse.STATUS_SUCCESS)
-            .setData(jobsFailed);
-            res.send(response);
-        } catch (error) {
-            const response = ApiResponse
-            .serverError()
-            .setError(error);
-            res.send(response);
-        }
-    });
+    });   
     
-   app.get("/job/:jobId/logs", async (req, res) => {
+    app.delete("/worker/:instanceId",async (req, res) => {
         try {
-            const jobId = req.params.jobId;
-            const jobsLogs = await Promise.resolve([
-                {
-                    "jobId": jobId,
-                    "logs": "Job logs"
-                }
-            ])
+            const instanceId = req.params.instanceId;
+            if(instanceId == null) {
+                throw new Error('instanceId is required');
+            }
+            const result = await deleteWorker(instanceId);
+            if(result.success === false) throw new Error(result.message);
 
             const response = ApiResponse
             .success()
-            .setStatusCode(ApiResponse.STATUS_SUCCESS)
-            .setData(jobsLogs);
+            .setData('Worker deleted successfully')
             res.send(response);
-
         } catch (error) {
             const response = ApiResponse
             .serverError()
-            .setError(error);
+            .setError(error.message)
             res.send(response);
         }
-    });
-    app.post("/job/retry/:jobId", async (req, res) => {
-        try {
-            const jobId = req.params.jobId;
-            
-            
-            const response = ApiResponse
-            .success()
-            .setStatusCode(ApiResponse.STATUS_SUCCESS)
-            .setData('Job retried successfully');
+    })
 
-            setTimeout(() => {
-                res.send(response);
-            },3*1000);
-
-        } catch (error) {
-            const response = ApiResponse
-            .serverError()
-            .setError(error);
-            res.send(response);
-        }
-    });
-    
+    // Zookeeper
+    app.get("/zookeeper",async (req, res) => {})
+    app.post("/zookeeper",async (req, res) => {})
+    app.put("/zookeeper",async (req, res) => {})
+    app.delete("/zookeeper",async (req, res) => {})
 }

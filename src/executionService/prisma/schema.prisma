@@ -28,6 +28,17 @@ enum WorkerStatus {
   DOWN
 }
 
+enum ZookeeperNodeStatus {
+  ACTIVE
+  DOWN
+}
+
+enum LogLevel {
+  INFO
+  ERROR
+  DEBUG
+}
+
 enum JobType {
   EMAIL
   NOTIFICATION
@@ -39,19 +50,6 @@ enum JobType {
 enum WorkerType {
   SCHEDULER
   EXECUTOR
-}
-
-enum segment {
-  SEGMENT_0
-  SEGMENT_1
-  SEGMENT_2
-  SEGMENT_3
-  SEGMENT_4
-  SEGMENT_5
-  SEGMENT_6
-  SEGMENT_7
-  SEGMENT_8
-  SEGMENT_9
 }
 
 model Job {
@@ -72,11 +70,9 @@ model Job {
 }
 
 model JobSchedule {
-  job_id              String   @id @unique
+  job_id              String @id @unique
   next_execution_time Int
-  segment             segment?
-
-  job Job @relation(fields: [job_id], references: [job_id], onDelete: Cascade)
+  job                 Job    @relation(fields: [job_id], references: [job_id], onDelete: Cascade)
 
   @@map("job_schedule")
 }
@@ -99,7 +95,7 @@ model JobExecutionHistory {
 
 model Worker {
   worker_id           String                @id @default(uuid()) // UUID as primary key
-  instanceId          String                @unique // Lambda invocation ID (prod) or hostname:port (dev)
+  instanceId          String                @unique
   region              String                @default("local") // AWS region (prod) or 'local' (dev)
   status              WorkerStatus
   type                WorkerType
@@ -110,4 +106,25 @@ model Worker {
   JobExecutionHistory JobExecutionHistory[]
 
   @@map("worker")
+}
+
+model ZooKeeperNode {
+  id        String              @id @default(uuid())
+  hostname  String              @unique
+  ipAddress String
+  status    ZookeeperNodeStatus
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  @@map("zookeeper_node")
+}
+
+model JobLog {
+  id        String   @id @default(uuid())
+  jobId     String
+  message   String
+  level     LogLevel
+  timestamp DateTime @default(now())
+
+  @@map("job_log")
 }

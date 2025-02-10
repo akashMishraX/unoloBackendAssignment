@@ -36,7 +36,7 @@ export default class ExecutorService {
       // Add this to your DistributedScheduler class
     async start() {
         try {
-            console.log('Starting scheduler...');
+            console.log('Starting executor...');
             await this.initializeZookeeper();
             console.log(`Node ${this.nodeId} connected to Zookeeper`);
             
@@ -49,9 +49,9 @@ export default class ExecutorService {
             this.zk.on('disconnected', () => {
                 console.log('Disconnected from Zookeeper');
             });
-            console.log('Scheduler started.');
+            console.log('Executor started.');
         } catch (error) {
-            console.error('Failed to start scheduler:', error);
+            console.error('Failed to start executor:', error);
         }
     }
     async initializeZookeeper() {
@@ -336,7 +336,17 @@ export default class ExecutorService {
             console.warn("⚠️ No job received. The queue might be empty.");
             return; // Just return instead of throwing an error
         }
-    
+        const workers = await this.db.worker.findMany({
+            where: {
+                type: 'EXECUTOR',
+                status: 'IDLE'
+            }
+        });
+        
+        // if (workers.length === 0) {
+        //     console.warn("⚠️ No idle workers available. The queue might be empty.");
+        //     return;
+        // }
         const { jobId, jobType, payload } = job.data;
     
         await this.updateJobStatus(jobId, 'RUNNING');

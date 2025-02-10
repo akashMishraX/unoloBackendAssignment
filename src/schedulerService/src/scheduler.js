@@ -266,12 +266,15 @@ export default class DistributedScheduler {
                 where: {
                     next_execution_time: {
                         lte: execution_time,
-                        gte: execution_time - 60
                     }
                 },
                 include: {
                     job: true
-                }
+                },
+                orderBy: {
+                    next_execution_time: 'asc'  
+                },
+                take: 100 
             });
     
             console.log('Jobs to be scheduled:', scheduledJobs);
@@ -292,14 +295,44 @@ export default class DistributedScheduler {
                         console.log(`Job ${scheduledJob.job_id} is already ${existingExecution.status}. Skipping.`);
                         continue;
                     }
-    
+                    
+                    // Check if job has exceeded max delay
+                    const delay = execution_time - scheduledJob.next_execution_time;
+                    if (delay > (24 * 60 * 60)) { 
+                        console.log(`Job ${scheduledJob.job_id} exceeded max delay. Marking as failed.`);
+                        await this.db.jobExecutionHistory.upsert({
+                            where: {
+                                job_id_worker_id: {
+                                    job_id: scheduledJob.job_id,
+                                    worker_id: workers[0].worker_id
+                                }
+                            },
+                            update: {
+                                execution_time: new Date(execution_time * 1000),
+                                last_update_time: new Date(),
+                                status: 'FAILED',
+                                error_message: 'Job exceeded maximum delay time'
+                            },
+                            create: {
+                                job_id: scheduledJob.job_id,
+                                worker_id: workers[0].worker_id,
+                                execution_time: new Date(execution_time * 1000),
+                                last_update_time: new Date(),
+                                status: 'FAILED',
+                                error_message: 'Job exceeded maximum delay time'
+                            }
+                        });
+                        continue;
+                    }
+
                     const workers = await this.db.worker.findMany({
                         where: {
                             type: 'SCHEDULER',
                             status: 'IDLE'
                         }
                     });
-    
+                    
+                    // Check if there are any idle workers
                     if (!workers.length) {
                         console.error('No active workers available');
                         continue;
@@ -314,7 +347,9 @@ export default class DistributedScheduler {
                         jobType: scheduledJob.job.job_type,
                         payload: scheduledJob.job.payload,
                         interval: scheduledJob.job.interval,
-                        isRecurring: scheduledJob.job.is_recurring
+                        isRecurring: scheduledJob.job.is_recurring,
+                        originalScheduledTime: scheduledJob.next_execution_time,
+                        delay: delay 
                     });
     
                     // Create execution record after successful queue addition
@@ -458,30 +493,7 @@ export default class DistributedScheduler {
         }
 
     }
-    // async updateConnectionString() {
-    //     await this.db.$connect();
-    //     try {
-    //         const result = await this.db.worker.findMany({
-    //             where: { type: 'SCHEDULER' }
-    //         });
-    //         console.log('Updating Zookeeper connectionString:', result);
-    //         // Construct connection string dynamically
-    //         this.config.zookeeper.connectionString = result
-    //             .map(worker => `${worker.instanceId}`)
-    //             .join(',');
     
-    //         console.log('Updated Zookeeper connectionString:', this.config.zookeeper.connectionString);
-    //     } catch (error) {
-    //         console.error('Error updating Zookeeper connectionString:', error);
-    //     } finally {
-    //         await this.db.$disconnect();
-    //     }
-    // }
-    // async setUpdatedConnectionStringInterval() {
-    //     this.connectionStringInterval = setInterval(async () => {
-    //         await this.updateConnectionString();
-    //     }, 60 * 1000);
-    // }
     async shutdown() {
         if (this.pollingInterval) {
             clearInterval(this.pollingInterval);

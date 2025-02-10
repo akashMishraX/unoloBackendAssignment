@@ -1,0 +1,209 @@
+openapi: 3.0.1
+info:
+  title: job scheduling
+  contact: {}
+  version: 1.0.0
+servers:
+- url: ${STORE_SERVICE_URL}
+tags: []
+paths:
+  /:
+    get:
+      summary: Docs
+      description: Docs
+      operationId: docs
+      responses:
+        "200":
+          description: ""
+          content: {}
+  /job:
+    post:
+      summary: Add a job
+      description: Add a job
+      operationId: addAJob
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                interval:
+                  type: string
+                  example: PT10S
+                isRecurring:
+                  type: boolean
+                  example: false
+                jobName:
+                  type: string
+                  example: Send an email to aaruni
+                jobType:
+                  type: string
+                  example: EMAIL
+                payload:
+                  type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: |
+                            "Hello Sir,<br>I am Akash Mishra, an IIT Madras
+                            BS in Data science and Application student. <br>I have
+                            experience building Restful APIs with robust authentication,
+                            and I streamline testing through Postman collections
+                            with  experience in javascript ,typescript and python.
+                            I love to solve backend and server related  problems.<br>I
+                            am happy to get some opportunity to work with you if
+                            possible.I would love to hear back from you <br>Best
+                            regards,<br> Akash Mishra"
+                        password:
+                          type: string
+                          example: givj xjdr xfmz fjcm
+                        recipient:
+                          type: string
+                          example: akashmishrax1@gmail.com
+                        sender:
+                          type: string
+                          example: mak650650@gmail.com
+                        subject:
+                          type: string
+                          example: Backend Developer Looking to Connect
+                userId:
+                  type: string
+                  example: "2"
+        required: false
+      responses:
+        "200":
+          description: ""
+          content: {}
+      x-codegen-request-body-name: body
+  /job/2:
+    get:
+      summary: Get a job by userId
+      description: Get a job by userId
+      operationId: getAJobByUserid
+      responses:
+        "200":
+          description: ""
+          content: {}
+  /job/323848cb-5227-48ea-a4f6-2330078eb956:
+    delete:
+      summary: Delete a job
+      description: Delete a job
+      operationId: deleteAJob
+      parameters:
+      - name: jobid
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ""
+          content: {}
+  /jobs:
+    get:
+      summary: Get all jobs
+      description: Get all jobs
+      operationId: getAllJobs
+      responses:
+        "200":
+          description: ""
+          content: {}
+  /logs/job/0eb61243-ec9c-419b-ad8a-2eb84b110a37:
+    get:
+      summary: Get Log by jobId
+      description: Get Log by jobId
+      operationId: getLogByJobid
+      responses:
+        "200":
+          description: ""
+          content: {}
+  /logs/jobs:
+    get:
+      summary: Get Logs
+      description: Get Logs
+      operationId: getLogs
+      responses:
+        "200":
+          description: ""
+          content: {}
+  /status/jobs:
+    get:
+      summary: Get job by status
+      description: Get job by status
+      operationId: getJobByStatus
+      parameters:
+      - name: status
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ""
+          content: {}
+  /worker:
+    put:
+      summary: update worker status
+      description: update worker status
+      operationId: updateWorkerStatus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                instanceId:
+                  type: string
+                  example: ak:2181
+                status:
+                  type: string
+                  example: BUSY
+        required: false
+      responses:
+        "200":
+          description: ""
+          content: {}
+      x-codegen-request-body-name: body
+    post:
+      summary: Add a worker
+      description: Add a worker
+      operationId: addAWorker
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                capacity:
+                  type: number
+                  example: 10.0
+                instanceId:
+                  type: string
+                  example: ak:2181
+                region:
+                  type: string
+                  example: local
+                status:
+                  type: string
+                  example: IDLE
+                type:
+                  type: string
+                  example: SCHEDULER
+        required: false
+      responses:
+        "200":
+          description: ""
+          content: {}
+      x-codegen-request-body-name: body
+  /worker/ak:2181:
+    delete:
+      summary: Delete  a worker
+      description: Delete  a worker
+      operationId: deleteAWorker
+      responses:
+        "200":
+          description: ""
+          content: {}
+components: {}
+x-original-swagger-version: "2.0"
