@@ -49,6 +49,37 @@ export default function apis(app) {
                 return res.send(response);
             }
             console.log(jobType)
+            switch (jobType) {
+                case 'EMAIL':
+                    if(
+                        !payload['data']['sender'] ||
+                        !payload['data']['password'] ||
+                        !payload['data']['recipient'] ||
+                        !payload['data']['subject'] ||
+                        !payload['data']['message']
+                    ){
+                        const response = ApiResponse
+                        .validationError().
+                        setError('Invalid email payload');
+                        return res.send(response);
+                    }
+                    break;
+                case 'NOTIFICATION':
+                    break;
+                case 'CODE':
+                    if(
+                        !payload['data']['codefile'] ||
+                        !payload['data']['yamlfile']
+                    ){
+                        const response = ApiResponse
+                        .validationError().
+                        setError('Invalid code payload');
+                        return res.send(response);
+                    }
+                    break;
+                default:
+                    
+            }
             const jobData = {
                 userId: userId,
                 jobName: jobName,
@@ -101,8 +132,8 @@ export default function apis(app) {
     // Get jobs by userId [YES]
     app.get("/job/:userId",async (req, res) => {
         try {
-            const jobId = req.params.jobId;
-            const jobData = await getJob(jobId);
+            const userId = req.params.userId;
+            const jobData = await getJob(userId);
             const response = ApiResponse
             .success()
             .setStatusCode(ApiResponse.STATUS_SUCCESS)
@@ -156,6 +187,8 @@ export default function apis(app) {
             res.send(response);
         }
     });
+
+
     // Get job log by jobId [YES]
     app.get("/logs/job", async (req, res) => {
         try {

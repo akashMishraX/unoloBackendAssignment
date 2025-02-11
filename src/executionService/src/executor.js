@@ -3,6 +3,7 @@ import zookeeper from 'node-zookeeper-client';
 import PrismaClientSingleton from './util/prismaClient.js';
 import BullMqClient from './util/bullMqClient.js'
 import EmailService from './services/email/index.js';
+import CodeService from './services/code/codeRunner.js';
 import os from 'os';
 
 
@@ -350,7 +351,7 @@ export default class ExecutorService {
         const { jobId, jobType, payload } = job.data;
     
         await this.updateJobStatus(jobId, 'RUNNING');
-    
+        let result;
         try {
             switch (jobType) {
                 case 'EMAIL':
@@ -359,11 +360,18 @@ export default class ExecutorService {
                 case 'NOTIFICATION':
                     await this.processNotificationJob(payload);
                     break;
+                case 'CODING':
+                    result = await this.processCodeJobs(payload);
+                    if(result) {
+                        await this.updateJobResult(jobId, result);
+                    }
+                    break;
                 default:
                     throw new Error(`Unknown job type: ${jobType}`);
             }
     
             await this.updateJobStatus(jobId, 'COMPLETED');
+            
             console.log(`✅ Job ${jobId} completed successfully`);
         } catch (error) {
             console.error(`❌ Error processing job ${jobId}:`, error);
@@ -372,7 +380,25 @@ export default class ExecutorService {
     }
         
         
-        
+    async updateJobResult(jobId, result) {
+        await this.db.$connect();
+        try {
+            await this.db.jobExecutionHistory.updateMany({
+                where: {
+                    job_id: jobId,
+                    status: {
+                        notIn: ['COMPLETED', 'FAILED','CANCELLED','PENDING']
+                    }
+                },
+                data: {
+                    response: JSON.stringify(result),
+                    last_update_time: new Date()
+                }    
+            });
+        } finally {
+            await this.db.$disconnect();
+        }
+    }
 
     async updateJobStatus(jobId, status, errorMessage = null) {
         await this.db.$connect();
@@ -406,6 +432,18 @@ export default class ExecutorService {
         // Add your email sending implementation
     }
 
+    async processCodeJobs(payload) {
+        // Implement code execution logic
+        console.log('Processing code job:');
+        const codefile = payload.codefile;
+        const yamlfile = payload.yamlfile;
+        // Add your code execution implementation
+        const codeService = new CodeService(codefile, yamlfile);
+        const output = await codeService.executeJob();
+        console.log('Code job processed.',output);
+        return output;
+
+    }
     async processNotificationJob(payload) {
         // Implement notification logic
         console.log('Processing notification job:', payload);

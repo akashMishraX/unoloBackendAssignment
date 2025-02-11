@@ -42,6 +42,7 @@ enum LogLevel {
 enum JobType {
   EMAIL
   NOTIFICATION
+  CODING
   DATA_PROCESSING
   REPORT
   BACKUP
@@ -84,6 +85,7 @@ model JobExecutionHistory {
   status           JobStatus
   retry_count      Int
   last_update_time DateTime
+  response         Json?
   error_message    String?
 
   job    Job    @relation(fields: [job_id], references: [job_id], onDelete: Cascade)

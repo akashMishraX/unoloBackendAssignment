@@ -9,7 +9,7 @@ export async function addJob(data) {
         if(!data) {
             throw new Error('Invalid data');
         }
-
+        console.log(data)
         if(!Types.getJobTypes()[data.jobType]) {
             throw new Error('Invalid job type');
         }

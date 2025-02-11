@@ -18,9 +18,9 @@ paths:
           content: {}
   /job:
     post:
-      summary: Add a job
-      description: Add a job
-      operationId: addAJob
+      summary: Add a code job
+      description: Add a code job
+      operationId: addACodeJob
       requestBody:
         content:
           application/json:
@@ -35,40 +35,27 @@ paths:
                   example: false
                 jobName:
                   type: string
-                  example: Send an email to aaruni
+                  example: 'Create a Javascript code '
                 jobType:
                   type: string
-                  example: EMAIL
+                  example: CODING
                 payload:
                   type: object
                   properties:
                     data:
                       type: object
                       properties:
-                        message:
+                        codefile:
                           type: string
                           example: |
-                            "Hello Sir,<br>I am Akash Mishra, an IIT Madras
-                            BS in Data science and Application student. <br>I have
-                            experience building Restful APIs with robust authentication,
-                            and I streamline testing through Postman collections
-                            with  experience in javascript ,typescript and python.
-                            I love to solve backend and server related  problems.<br>I
-                            am happy to get some opportunity to work with you if
-                            possible.I would love to hear back from you <br>Best
-                            regards,<br> Akash Mishra"
-                        password:
+                           "// @requirements\n//express \n let a=5;\n a=a+10;\n
+                            console.log('Script executed successfully from Node.js
+                            sandbox:)',a);"
+                        yamlfile:
                           type: string
-                          example: givj xjdr xfmz fjcm
-                        recipient:
-                          type: string
-                          example: akashmishrax1@gmail.com
-                        sender:
-                          type: string
-                          example: mak650650@gmail.com
-                        subject:
-                          type: string
-                          example: Backend Developer Looking to Connect
+                          example: |-
+                            language: node
+                            entrypoint: node index.js
                 userId:
                   type: string
                   example: "2"
@@ -155,7 +142,7 @@ paths:
               properties:
                 instanceId:
                   type: string
-                  example: ak:2181
+                  example: ak
                 status:
                   type: string
                   example: BUSY
@@ -180,7 +167,7 @@ paths:
                   example: 10.0
                 instanceId:
                   type: string
-                  example: ak:2181
+                  example: ak
                 region:
                   type: string
                   example: local
