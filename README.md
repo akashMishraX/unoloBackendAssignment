@@ -22,8 +22,17 @@ This system is a distributed job scheduling and execution system designed to han
 4. **Queue Management**: Redis is used for its high-speed in-memory data structure store.
 
 ### Trade-offs
-- **Complexity vs. Simplicity**: Using ZooKeeper adds complexity but ensures robust coordination.
-- **Persistence vs. Performance**: PostgreSQL provides reliable storage at the cost of slightly slower performance compared to purely in-memory solutions.
+- **Simplicity vs. Scalability**
+  1. *Choice*: Modular design separates Store, Scheduler, and Executor services for scalability.
+  2. *Trade-off*: Increased complexity in managing inter-service communication.
+
+- **Latency vs. Consistency**
+  1. *Choice*: Strong consistency across services for job states.
+  2. *Trade-off*: If not Managed properly may cause higher latency due to synchronization overhead.
+
+- **Operational Overhead vs. Reliability**
+  1. *Choice*: Multiple tools (Redis, PostgreSQL, ZooKeeper) enhance reliability.
+  2. *Trade-off*: Increased operational complexity for deployment and maintenance.
 
 ---
 
@@ -34,6 +43,11 @@ The API documentation is available [here](https://documenter.getpostman.com/view
 2. Job status updates
 3. Monitoring scheduled and executed jobs
 
+---
+## Key Notes:
+  1. **Redis BullMQ**: Ensures fast in-memory queuing for jobs, enabling low-latency scheduling and execution.
+  2. **PostgreSQL**: Provides persistent storage for job metadata and status tracking.
+  3. **ZooKeeper (Single Node)**: Used solely for leader election without quorum, which simplifies the setup but introduces a single point of failure.
 ---
 
 ## Development Setup
