@@ -14,7 +14,7 @@ This system is a distributed job scheduling and execution system designed to han
 ---
 
 ## Architecture
-
+![system_deisgn](https://pplx-res.cloudinary.com/image/upload/v1739254528/user_uploads/TCnQqHevDZIZXzN/image.jpg)
 ### Design Choices
 1. **Scalability**: The system is designed to scale horizontally with multiple workers for each service.
 2. **Fault Tolerance**: ZooKeeper ensures leader election and avoids single points of failure.
@@ -44,8 +44,10 @@ The API documentation is available [here](https://documenter.getpostman.com/view
 
 ### Configuration Instructions
 1. Update the `POSTGRES_USER` environment variable in the `docker-compose.yaml` file to your username (e.g., `akash`).
-2. Update the `DATABASE_URL` environment variable with your username in this format: `postgresql://<username>:<password>@localhost:5432/myPostgres?schema=public`
-    Example:`postgresql://akash:1234@localhost:5432/myPostgres?schema=public`
+2. Update the `DATABASE_URL` environment variable with your username in this format:
+```postgresql://<username>:<password>@localhost:5432/myPostgres?schema=public```
+Example:
+```postgresql://akash:1234@localhost:5432/myPostgres?schema=public```
 
 
 ### Docker Compose File
