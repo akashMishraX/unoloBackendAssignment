@@ -16,10 +16,10 @@ This system is a distributed job scheduling and execution system designed to han
 ## Architecture
 ![system_deisgn](https://pplx-res.cloudinary.com/image/upload/v1739254528/user_uploads/TCnQqHevDZIZXzN/image.jpg)
 ### Design Choices
-1. **Scalability**: The system is designed to scale horizontally with multiple workers for each service.
-2. **Fault Tolerance**: ZooKeeper ensures leader election and avoids single points of failure.
-3. **Separation of Concerns**: Each service has a distinct responsibility (e.g., scheduling, execution).
-4. **Queue Management**: Redis is used for its high-speed in-memory data structure store.
+1. **Scalability**: The system is designed to **scale horizontally** with multiple workers for each service.
+2. **Fault Tolerance**: ZooKeeper ensures **leader election** and avoids single points of failure.
+3. **Separation of Concerns**: Each service has a **distinct responsibility** (e.g., scheduling, execution).
+4. **Queue Management**: **Redis** is used for its high-speed in-memory data structure store.
 
 ### Trade-offs
 - **Simplicity vs. Scalability**
@@ -28,7 +28,7 @@ This system is a distributed job scheduling and execution system designed to han
 
 - **Latency vs. Consistency**
   1. *Choice*: Strong consistency across services for job states.
-  2. *Trade-off*: If not Managed properly may cause higher latency due to synchronization overhead.
+  2. *Trade-off*: If not managed properly may cause higher latency due to synchronization overhead.
 
 - **Operational Overhead vs. Reliability**
   1. *Choice*: Multiple tools (Redis, PostgreSQL, ZooKeeper) enhance reliability.
@@ -38,7 +38,8 @@ This system is a distributed job scheduling and execution system designed to han
 
 ## API Documentation
 
-Postman Collection:-[link](https://documenter.getpostman.com/view/29155906/2sAYX9nfwU). 
+**Postman Collection**: [LINK](https://documenter.getpostman.com/view/29155906/2sAYX9nfwU). 
+
 It provides detailed information on endpoints for:
 1. Job creation
 2. Job status updates
@@ -60,9 +61,10 @@ It provides detailed information on endpoints for:
 ### Configuration Instructions
 1. Update the `POSTGRES_USER` environment variable in the `docker-compose.yaml` file to your username (e.g., `akash`).
 2. Update the `DATABASE_URL` environment variable with your username in this format:
-```postgresql://<username>:<password>@localhost:5432/myPostgres?schema=public```
+`postgresql://<username>:<password>@localhost:5432/myPostgres?schema=public`
+
 Example:
-```postgresql://akash:1234@localhost:5432/myPostgres?schema=public```
+`postgresql://akash:1234@localhost:5432/myPostgres?schema=public`
 
 
 ### Docker Compose File
