@@ -38,7 +38,8 @@ This system is a distributed job scheduling and execution system designed to han
 
 ## API Documentation
 
-The API documentation is available [here](https://documenter.getpostman.com/view/29155906/2sAYX9nfwU). It provides detailed information on endpoints for:
+Postman Collection:-[link](https://documenter.getpostman.com/view/29155906/2sAYX9nfwU). 
+It provides detailed information on endpoints for:
 1. Job creation
 2. Job status updates
 3. Monitoring scheduled and executed jobs
