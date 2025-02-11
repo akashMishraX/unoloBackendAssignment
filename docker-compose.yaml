@@ -1,19 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Service
-  postgres:
-    image: postgres:latest
-    container_name: Postgres
-    restart: always
-    network_mode: "host"
-    environment:
-      POSTGRES_USER: akash
-      POSTGRES_PASSWORD: 1234
-      POSTGRES_DB: myPostgres
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
   # Redis Service
   redis:
     image: redis:latest
@@ -36,7 +23,7 @@ services:
 
   # Store Service
   store-service:
-    image: akashmishrax/storeservice:latest
+    build: ./src/storeService
     container_name: StoreService
     restart: always
     network_mode: "host"
@@ -44,14 +31,16 @@ services:
       STORE_SERVICE_PORT: 3000
       REDIS_HOST: localhost
       REDIS_PORT: 6379
-      DATABASE_URL: "postgresql://akash:1234@localhost:5432/myPostgres?schema=public"
+      DATABASE_URL: "postgresql://postgres:Sultanpur12@rds-postgres-ec2-graphql-server.crqiamkkkwdr.ap-south-1.rds.amazonaws.com/postgres?schema=public"
       NODE_ENV: development
       LOG_LEVEL: info
       STORE_SERVICE_URL: http://localhost:3000
+    depends_on:
+      - redis
 
   # Executor Service
   executor-service:
-    image: akashmishrax/executorservice:latest
+    build: ./src/executionService
     container_name: ExecutorService
     restart: always
     network_mode: "host"
@@ -59,12 +48,16 @@ services:
       ZOOKEEPER_HOST: localhost:2181
       REDIS_HOST: localhost
       REDIS_PORT: 6379
-      DATABASE_URL: "postgresql://akash:1234@localhost:5432/myPostgres?schema=public"
+      DATABASE_URL: "postgresql://postgres:Sultanpur12@rds-postgres-ec2-graphql-server.crqiamkkkwdr.ap-south-1.rds.amazonaws.com/postgres?schema=public"
       NODE_ENV: development
+    depends_on:
+      - zookeeper
+      - redis
+      - store-service
 
   # Scheduler Service
   scheduler-service:
-    image: akashmishrax/schedulerservice:latest
+    build: ./src/schedulerService
     container_name: SchedulerService
     restart: always
     network_mode: "host"
@@ -72,8 +65,12 @@ services:
       ZOOKEEPER_HOST: localhost:2181
       REDIS_HOST: localhost
       REDIS_PORT: 6379
-      DATABASE_URL: "postgresql://akash:1234@localhost:5432/myPostgres?schema=public"
+      DATABASE_URL: "postgresql://postgres:Sultanpur12@rds-postgres-ec2-graphql-server.crqiamkkkwdr.ap-south-1.rds.amazonaws.com/postgres?schema=public"
       NODE_ENV: development
+    depends_on:
+      - zookeeper
+      - redis
+      - store-service
 
 volumes:
   postgres_data:

@@ -1,15 +1,32 @@
 # Stage 1: Build
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-RUN npx prisma generate --schema=prisma/schema.prisma
 
-# Stage 2: Production Image
-FROM node:18-alpine AS production
+# Install dependencies required for Prisma
+RUN apk add --no-cache openssl
+
+# Copy package files first to leverage Docker cache
+COPY package*.json ./
+RUN npm ci
+
+# Copy application files
+COPY . .
+
+# Generate Prisma Client
+RUN npx prisma generate
+
+# Stage 2: Production
+FROM node:20-alpine AS production
 WORKDIR /app
-COPY --from=builder /app .
+
+# Install runtime dependencies
+RUN apk add --no-cache openssl
+
+# Copy built application
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/src ./src
+
 EXPOSE 4000
-# Assumes schedulerService starts via src/index.js (or change to scheduler.js if needed)
 CMD ["node", "src/index.js"]
