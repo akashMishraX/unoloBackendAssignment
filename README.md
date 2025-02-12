@@ -1,5 +1,19 @@
 # Job Scheduling System Documentation
 
+## Table of Contents  
+1. [Overview](#overview)  
+2. [Development Setup](#development-setup)  
+   - [Prerequisites](#prerequisites)  
+   - [Steps to Run the System Locally](#steps-to-run-the-system-locally)  
+3. [Architecture](#architecture)  
+   - [Design Choices](#design-choices)  
+   - [Trade-offs](#trade-offs)  
+4. [API Documentation](#api-documentation)  
+5. [Key Notes](#key-notes)  
+6. [Monitoring and Logs](#monitoring-and-logs)  
+7. [Notes](#notes)  
+
+---
 ## Overview
 
 This system is a distributed job scheduling and execution system designed to handle tasks efficiently. It uses **PostgreSQL** for persistent storage, **Redis** for job queue management, and **ZooKeeper** for leader election and coordination among services. The architecture includes the following key components:
@@ -10,6 +24,26 @@ This system is a distributed job scheduling and execution system designed to han
 - **ZooKeeper**: Manages leader election and ephemeral sequential nodes.
 - **Redis**: Acts as a message queue for job management.
 - **PostgreSQL**: Stores job metadata persistently.
+
+---
+
+## Development Setup
+
+### Prerequisites
+1. Install Docker and Docker Compose on your machine.
+2. Ensure all required ports (e.g. 6379, 2181, 3000 etc.) are free to use.
+
+### Steps to Run the System Locally
+
+1. Clone the repository containing the `docker-compose.yaml` file.
+2. Navigate to the directory containing the file.
+3. Run the following command to start all services: `docker-compose up --build -d`
+
+4. Verify that all containers are running using:`docker ps`
+
+5. Access individual services via their respective ports (e.g., Store Service at port `3000`).
+
+For Swagger Documentation : `http://localhost:3000/docs`
 
 ---
 
@@ -36,6 +70,7 @@ This system is a distributed job scheduling and execution system designed to han
 
 ---
 
+
 ## API Documentation
 
 **Postman Collection**: [LINK](https://documenter.getpostman.com/view/29155906/2sAYX9nfwU). 
@@ -52,23 +87,6 @@ It provides detailed information on endpoints for:
   3. **ZooKeeper (Single Node)**: Used solely for leader election without quorum, which simplifies the setup but introduces a single point of failure.
 ---
 
-## Development Setup
-
-### Prerequisites
-1. Install Docker and Docker Compose on your machine.
-2. Ensure all required ports (e.g. 6379, 2181, 3000 etc.) are free to use.
-
-### Steps to Run the System Locally
-
-1. Clone the repository containing the `docker-compose.yaml` file.
-2. Navigate to the directory containing the file.
-3. Run the following command to start all services: `docker-compose up --build -d`
-
-4. Verify that all containers are running using:`docker ps`
-
-5. Access individual services via their respective ports (e.g., Store Service at port `3000`).
-
----
 
 ## Monitoring and Logs
 
