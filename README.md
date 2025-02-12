@@ -45,6 +45,8 @@ This system is a distributed job scheduling and execution system designed to han
 
 5. Access Apis via port `3000`.
 ```http:localhost:3000```
+6.  To stop containers:
+```docker-compose down```
 
 **For Swagger Documentation** : 
 ```http://localhost:3000/docs```
