@@ -43,7 +43,7 @@ This system is a distributed job scheduling and execution system designed to han
 4. Verify that all containers are running using:
 ```docker ps```
 
-5. Access individual services via their respective ports (e.g., Store Service at port `3000`).
+5. Access Apis via port `3000`.
 ```http:localhost:3000```
 
 **For Swagger Documentation** : 
