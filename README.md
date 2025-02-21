@@ -13,6 +13,7 @@
 6. [Monitoring and Logs](#monitoring-and-logs)  
 7. [Notes](#notes)  
 
+[Video link](https://drive.google.com/file/d/1DxI5RkCGRrxlYsyFVRP4gBoF9JREHa6h/view?usp=sharing)
 ---
 ## Overview
 
